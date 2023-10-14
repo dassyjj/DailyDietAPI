@@ -64,15 +64,15 @@ export const routes = [
     method: "POST",
     path: buildRoutePath("/register"),
     handler: (req, res) => {
-      const { name, email, password } = req.body
+      const { name, email, password } = req.body;
 
       if (name && email && password) {
         const users = database.select("users", {
-          name: name,
-          email: email,
+          name,
+          email,
         });
 
-        const checkParameters = users.find(row => row.name === name || row.email === email) ?? []
+        const checkParameters = users.find((row) => row.name === name || row.email === email) ?? [];
 
         if (checkParameters.name === name) {
           return res
@@ -80,24 +80,49 @@ export const routes = [
             .end(JSON.stringify({ message: "This name already exists" }));
         }
 
-        if(checkParameters.email === email) {
+        if (checkParameters.email === email) {
           return res
             .writeHead(400)
             .end(JSON.stringify({ message: "This email already exists" }));
         }
 
-        if(checkParameters.name != name && checkParameters.email != email) {
-          database.insert('users', {
+        if (checkParameters.name != name && checkParameters.email != email) {
+          database.insert("users", {
             id: randomUUID(),
             name,
             email,
-            password
-          })
+            password,
+          });
           return res
             .writeHead(200)
             .end(JSON.stringify({ message: "registered" }));
         }
       }
     },
-  }
+  },
+  {
+    method: "GET",
+    path: buildRoutePath("/login"),
+    handler: (req, res) => {
+      const { name, password } = req.body
+
+      if (name && password) {
+        const users = database.select('users', {
+          name,
+          password
+        })
+
+        const checkParameters = users.find((row) => row.name === name && row.password === password) ?? [];
+        if (checkParameters.name && checkParameters.password) {
+          return res
+            .writeHead(200)
+            .end(JSON.stringify({ message: "Logged" }));
+        }
+
+        return res
+          .writeHead(400)
+          .end(JSON.stringify({ message: "Email or password are incorrect" }));
+      }
+    }
+  },
 ];
