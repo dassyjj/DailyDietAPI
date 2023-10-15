@@ -22,7 +22,6 @@ export class Database {
   select(table, search) {
     let data = this.#database[table] ?? [];
 
-
     if (search) {
       data = data.filter((row) => {
         return Object.entries(search).some(([key, value]) => {
@@ -58,6 +57,54 @@ export class Database {
 
     if (rowIndex > -1) {
       this.#database[table].splice(rowIndex, 1);
+      this.#persist();
+    }
+  }
+
+  insertSnack(table, id, newSnack) {
+    if (Array.isArray(this.#database[table])) {
+      const rowIndex = this.#database[table].findIndex((row) => row.id === id);
+
+      if (rowIndex > -1) {
+        this.#database[table][rowIndex].snacks.push(newSnack);
+      } else {
+        this.#database[table].push({
+          id,
+          snacks: [newSnack],
+        });
+      }
+    } else {
+      this.#database[table] = [
+        {
+          id,
+          snacks: [newSnack],
+        },
+      ];
+    }
+
+    this.#persist();
+  }
+
+  updateSnack(table, userID, snackID, newSnack) {
+    const user = this.#database[table].findIndex((row) => row.id === userID);
+    const snack = this.#database[table][user].snacks.findIndex(
+      (row) => row.id === snackID
+    );
+
+    if (snack > -1) {
+      this.#database[table][user].snacks[snack] = newSnack;
+      this.#persist();
+    }
+  }
+
+  deleteSnack(table, userID, snackID) {
+    const user = this.#database[table].findIndex((row) => row.id === userID);
+    const snack = this.#database[table][user].snacks.findIndex(
+      (row) => row.id === snackID
+    );
+
+    if (snack > -1) {
+      this.#database[table][user].snacks.splice(snack, 1);
       this.#persist();
     }
   }
