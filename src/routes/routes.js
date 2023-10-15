@@ -24,29 +24,12 @@ export const routes = [
   //     return res.end(JSON.stringify(users));
   //   },
   // },
-  // {
-  //   method: "POST",
-  //   path: buildRoutePath("/users"),
-  //   handler: (req, res) => {
-  //     const { name, email } = req.body;
-
-  //     const user = {
-  //       id: randomUUID(),
-  //       name,
-  //       email,
-  //     };
-
-  //     database.insert("users", user);
-
-  //     return res.writeHead(201).end();
-  //   },
-  // },
   {
     method: "PUT",
     path: buildRoutePath("/users/:id"),
     handler: (req, res) => {
-      const { name, email } = req.body;
-      database.update("users", req.params.id, name, email);
+      const { name, email, password } = req.body;
+      database.update("users", req.params.id, name, email, password);
 
       return res.writeHead(204).end();
     },
