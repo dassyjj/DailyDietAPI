@@ -5,15 +5,20 @@ import { knex } from '../database'
 import { randomUUID } from 'crypto'
 
 export async function snack(app: FastifyInstance) {
-  app.get('/', { preHandler: checkSessionIdExists }, async (req) => {
+  app.get('/', { preHandler: checkSessionIdExists }, async (req, reply) => {
     const sessionId = req.cookies.sessionId
 
-    const snacks = await knex('snacks').where('user_id', sessionId)
-
-    return { snacks }
+    await knex('snacks')
+      .where('user_id', sessionId)
+      .then((snacks) => {
+        reply.status(200).send({
+          snacks,
+        })
+      })
+      .catch((error) => reply.status(400).send(error))
   })
 
-  app.get('/:id', { preHandler: checkSessionIdExists }, async (req) => {
+  app.get('/:id', { preHandler: checkSessionIdExists }, async (req, reply) => {
     const sessionId = req.cookies.sessionId
 
     const getSnackParamsSchema = z.object({
@@ -22,14 +27,18 @@ export async function snack(app: FastifyInstance) {
 
     const { id } = getSnackParamsSchema.parse(req.params)
 
-    const snacks = await knex('snacks')
+    await knex('snacks')
       .where({
         id,
         user_id: sessionId,
       })
       .first()
-
-    return { snacks }
+      .then((snacks) => {
+        reply.status(200).send({
+          snacks,
+        })
+      })
+      .catch((error) => reply.status(400).send(error))
   })
 
   app.post(
