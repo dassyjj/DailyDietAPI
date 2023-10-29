@@ -35,7 +35,7 @@ export async function auth(app: FastifyInstance) {
     }
     await knex('users').insert(user)
 
-    reply.cookie('sessionId', user.id).status(201).send()
+    reply.cookies('sessionId', user.id).status(201).send()
   })
 
   app.post('/login', async (req, reply) => {
@@ -54,7 +54,7 @@ export async function auth(app: FastifyInstance) {
         })
         .first()
 
-      reply.cookie('sessionId', user.id, {
+      reply.cookies('sessionId', user.id, {
         path: '/',
         maxAge: 1000 * 60 * 60 * 24 * 7,
       })
